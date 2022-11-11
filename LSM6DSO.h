@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include "LSM6DS.h"
 
-#define LSM6DSO_WHOAMI 0x69
+#define LSM6DSO_WHOAMI 0x6C
 
 #define LSM6DSO_FN_SRC_STEP_COUNT_DELTA_IA 0b10000000 // pedometer step recognition on delta
 #define LSM6DSO_FN_SRC_SIGN_MOTION_IA      0b1000000 // significant motion event
