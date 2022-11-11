@@ -1,18 +1,14 @@
 /*
 MIT License
-
 Copyright (c) 2021 Pavel Slama
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,22 +19,22 @@ SOFTWARE.
 */
 
 #include "mbed.h"
-#include "LSM6DS3.h"
+#include "LSM6DSO.h"
 
-LSM6DS3::LSM6DS3(int address):
+LSM6DSO::LSM6DSO(int address):
     LSM6DS{address} {
 }
 
-LSM6DS3::LSM6DS3(PinName sda, PinName scl, int address, uint32_t frequency):
+LSM6DSO::LSM6DSO(PinName sda, PinName scl, int address, uint32_t frequency):
     LSM6DS{sda, scl, address, frequency} {
 }
 
-bool LSM6DS3::init(I2C *i2c_obj) {
+bool LSM6DSO::init(I2C *i2c_obj) {
     if (!LSM6DS::init(i2c_obj)) {
         return false;
     }
 
-    if (!checkWhoAmI(LSM6DS3_WHOAMI)) {
+    if (!checkWhoAmI(LSM6DSO_WHOAMI)) {
         tr_error("Different chip ID");
         return false;
     }
@@ -55,7 +51,7 @@ bool LSM6DS3::init(I2C *i2c_obj) {
     return updateAccelScale();
 }
 
-bool LSM6DS3::setupAccel(lsm6ds3_accel_odr_t odr, lsm6ds3_accel_scale_t scale, lsm6ds3_accel_aa_filter_t filter) {
+bool LSM6DSO::setupAccel(LSM6DSO_accel_odr_t odr, LSM6DSO_accel_scale_t scale, LSM6DSO_accel_aa_filter_t filter) {
     char data[1];
 
     // set XL_BW_SCAL_ODR=1 otherwise out new filter will not be used
@@ -76,7 +72,7 @@ bool LSM6DS3::setupAccel(lsm6ds3_accel_odr_t odr, lsm6ds3_accel_scale_t scale, l
     return updateAccelScale();
 }
 
-bool LSM6DS3::setAccelFilter(lsm6ds3_accel_lhpf_t filter, bool lp_6d) {
+bool LSM6DSO::setAccelFilter(LSM6DSO_accel_lhpf_t filter, bool lp_6d) {
     char data[1];
 
     if (!readRegister(REG_TAP_CFG, data)) {
@@ -143,11 +139,11 @@ bool LSM6DS3::setAccelFilter(lsm6ds3_accel_lhpf_t filter, bool lp_6d) {
     return writeRegister(REG_CTRL8_XL, data);
 }
 
-bool LSM6DS3::setGyroFilter(lsm6ds3_gyro_hpf_t filter) {
+bool LSM6DSO::setGyroFilter(LSM6DSO_gyro_hpf_t filter) {
     return LSM6DS::setGyroFilter((char)filter, (filter == GyroHPF_Off));
 }
 
-bool LSM6DS3::updateAccelScale() {
+bool LSM6DSO::updateAccelScale() {
     char data[1];
 
     if (!readRegister(REG_CTRL1_XL, data)) {
@@ -175,7 +171,7 @@ bool LSM6DS3::updateAccelScale() {
     return true;
 }
 
-bool LSM6DS3::significantMotion(bool enable, char threshold) {
+bool LSM6DSO::significantMotion(bool enable, char threshold) {
     char data[1];
     tr_info("Setting up significant motion event");
 
@@ -214,7 +210,7 @@ bool LSM6DS3::significantMotion(bool enable, char threshold) {
     return true;
 }
 
-bool LSM6DS3::setWakeup(char threshold, char wake_duration, char sleep_duration) {
+bool LSM6DSO::setWakeup(char threshold, char wake_duration, char sleep_duration) {
     char data[1];
     tr_info("Setting up wakeup event");
 
@@ -249,17 +245,17 @@ bool LSM6DS3::setWakeup(char threshold, char wake_duration, char sleep_duration)
     return writeRegister(REG_WAKE_UP_THS, data);
 }
 
-bool LSM6DS3::getFnIntReason(char *reason) {
+bool LSM6DSO::getFnIntReason(char *reason) {
     if (!readRegister((lsm6ds_reg_t)REG_FUNC_SRC, reason, 1)) {
         tr_error("Could not get function interrupt source");
         return false;
     }
 
-    tr_info("Fn interrupt reason - significant motion: %u", (*reason & LSM6DS3_FN_SRC_SIGN_MOTION_IA) >> 6);
+    tr_info("Fn interrupt reason - significant motion: %u", (*reason & LSM6DSO_FN_SRC_SIGN_MOTION_IA) >> 6);
     return true;
 }
 
-bool LSM6DS3::enableInactivity(bool enable) {
+bool LSM6DSO::enableInactivity(bool enable) {
     char data[1];
     tr_info("Setting up inactivity event");
 
@@ -273,7 +269,7 @@ bool LSM6DS3::enableInactivity(bool enable) {
     return writeRegister(REG_WAKE_UP_THS, data);
 }
 
-bool LSM6DS3::setIntLatchMode(bool enable) {
+bool LSM6DSO::setIntLatchMode(bool enable) {
     char data[1];
 
     if (!readRegister(REG_TAP_CFG, data)) {
@@ -286,7 +282,7 @@ bool LSM6DS3::setIntLatchMode(bool enable) {
     return writeRegister(REG_TAP_CFG, data);
 }
 
-bool LSM6DS3::fifoMode(char gyro_decimation, char accel_decimation) {
+bool LSM6DSO::fifoMode(char gyro_decimation, char accel_decimation) {
     char data[1];
     tr_info("Setting FIFO decimation");
 
@@ -297,10 +293,10 @@ bool LSM6DS3::fifoMode(char gyro_decimation, char accel_decimation) {
     return writeRegister((lsm6ds_reg_t)REG_FIFO_CTRL3, data);
 }
 
-float LSM6DS3::temperatureToC(int16_t raw) {
+float LSM6DSO::temperatureToC(int16_t raw) {
     return ((float)raw / 16.0) + 25.0;
 }
 
-float LSM6DS3::temperatureToF(int16_t raw) {
+float LSM6DSO::temperatureToF(int16_t raw) {
     return (temperatureToC(raw) * 9 / 5 + 32);
 }
