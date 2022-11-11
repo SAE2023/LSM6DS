@@ -24,7 +24,7 @@ int main() {
         return 0;
     }
 
-    if (!accel.setupAccel(LSM6DS3::AccelODR_26Hz, LSM6DS3::AccelScale_4G)) {
+    if (!accel.setupAccel(LSM6DSO::AccelODR_26Hz, LSM6DSO::AccelScale_4G)) {
         printf("Couldn't setup setup slow ODR accel\n");
         return 0;
     }
